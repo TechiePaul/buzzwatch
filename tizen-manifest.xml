@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="3.0" package="org.example.buzzwatchapp" version="1.0.0">
+	<profile name="wearable" />
+	<ui-application appid="org.example.buzzwatchapp" exec="buzzwatchapp" type="capp" multiple="false" taskmanage="true" nodisplay="false">
+		<icon>buzzwatchapp.png</icon>
+		<label>buzzwatchapp</label>
+	</ui-application>
+</manifest>
