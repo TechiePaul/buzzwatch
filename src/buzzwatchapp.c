@@ -7,6 +7,8 @@ typedef struct appdata {
 	Evas_Object *label;
 } appdata_s;
 
+haptic_device_h myVibratingThing;
+
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
 {
@@ -24,7 +26,6 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 create_base_gui(appdata_s *ad)
 {
-	haptic_device_h myVibratingThing;
 	int returnedVal;
 	haptic_effect_h effect_handle;
 
@@ -32,7 +33,6 @@ create_base_gui(appdata_s *ad)
 	returnedVal = device_haptic_open(0, &myVibratingThing);
 
 	device_haptic_vibrate(myVibratingThing, 5000, 100, &effect_handle);
-
 
 
 
@@ -111,6 +111,7 @@ static void
 app_terminate(void *data)
 {
 	/* Release all resources. */
+	device_haptic_close(myVibratingThing);
 }
 
 static void
