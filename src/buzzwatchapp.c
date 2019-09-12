@@ -1,6 +1,8 @@
 #include "buzzwatchapp.h"
 #include <device/haptic.h>
 
+// A simple change on Jamie's branch only
+
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
