@@ -1,4 +1,5 @@
 #include "buzzwatchapp.h"
+#include <device/haptic.h>
 
 typedef struct appdata {
 	Evas_Object *win;
@@ -23,6 +24,18 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 create_base_gui(appdata_s *ad)
 {
+	haptic_device_h myVibratingThing;
+	int returnedVal;
+	haptic_effect_h effect_handle;
+
+	// create the haptic device handle
+	returnedVal = device_haptic_open(0, &myVibratingThing);
+
+	device_haptic_vibrate(myVibratingThing, 5000, 100, &effect_handle);
+
+
+
+
 	/* Window */
 	/* Create and initialize elm_win.
 	   elm_win is mandatory to manipulate window. */
@@ -54,14 +67,16 @@ create_base_gui(appdata_s *ad)
 	ad->label = elm_label_add(ad->conform);
 	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
 	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	elm_object_style_set(ad->label, "slide_roll");
+	elm_label_slide_duration_set(ad->label, 3);
+	elm_label_slide_mode_set(ad->label, ELM_LABEL_SLIDE_MODE_ALWAYS);
 	elm_object_content_set(ad->conform, ad->label);
 
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
 }
 
-static bool
-app_create(void *data)
+static bool app_create(void *data)
 {
 	/* Hook to take necessary actions before main event loop starts
 		Initialize UI resources and application's data
@@ -134,8 +149,7 @@ ui_app_low_memory(app_event_info_h event_info, void *user_data)
 	/*APP_EVENT_LOW_MEMORY*/
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	appdata_s ad = {0,};
 	int ret = 0;
@@ -148,6 +162,7 @@ main(int argc, char *argv[])
 	event_callback.pause = app_pause;
 	event_callback.resume = app_resume;
 	event_callback.app_control = app_control;
+
 
 	ui_app_add_event_handler(&handlers[APP_EVENT_LOW_BATTERY], APP_EVENT_LOW_BATTERY, ui_app_low_battery, &ad);
 	ui_app_add_event_handler(&handlers[APP_EVENT_LOW_MEMORY], APP_EVENT_LOW_MEMORY, ui_app_low_memory, &ad);
