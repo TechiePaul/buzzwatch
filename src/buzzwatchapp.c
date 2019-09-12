@@ -1,11 +1,13 @@
 #include "buzzwatchapp.h"
-#include <device/haptic.h>
+#include <stdbool.h>
 
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *label;
 } appdata_s;
+
+static bool alarmStateActive = true;
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -24,18 +26,6 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 create_base_gui(appdata_s *ad)
 {
-	haptic_device_h myVibratingThing;
-	int returnedVal;
-	haptic_effect_h effect_handle;
-
-	// create the haptic device handle
-	returnedVal = device_haptic_open(0, &myVibratingThing);
-
-	device_haptic_vibrate(myVibratingThing, 5000, 100, &effect_handle);
-
-
-
-
 	/* Window */
 	/* Create and initialize elm_win.
 	   elm_win is mandatory to manipulate window. */
@@ -67,7 +57,7 @@ create_base_gui(appdata_s *ad)
 	ad->label = elm_label_add(ad->conform);
 	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
 	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	elm_object_style_set(ad->label, "slide_roll");
+	elm_object_style_set(ad->label, "slide_long");
 	elm_label_slide_duration_set(ad->label, 3);
 	elm_label_slide_mode_set(ad->label, ELM_LABEL_SLIDE_MODE_ALWAYS);
 	elm_object_content_set(ad->conform, ad->label);
@@ -76,7 +66,29 @@ create_base_gui(appdata_s *ad)
 	evas_object_show(ad->win);
 }
 
-static bool app_create(void *data)
+static void launchUIapp()
+{
+    app_control_h app_control = NULL;
+	app_control_create(&app_control);
+	app_control_set_operation(app_control, APP_CONTROL_OPERATION_DEFAULT);
+	app_control_set_app_id(app_control, "org.example.buzzwatchapp");
+
+	if(app_control_send_launch_request(app_control, NULL, NULL) == APP_CONTROL_ERROR_NONE)
+	{
+	    dlog_print(DLOG_INFO, "LAUNCH TEST", "Succeeded to launch Buzz Watch app UI.");
+		// app launched successfully
+	}
+	else
+	{
+	    dlog_print(DLOG_ERROR, "LAUNCH TEST", "Failed to launch Buzz Watch app UI.");
+	    // app launched unsuccessfully
+	}
+
+	app_control_destroy(app_control);
+}
+
+static bool
+app_create(void *data)
 {
 	/* Hook to take necessary actions before main event loop starts
 		Initialize UI resources and application's data
@@ -99,6 +111,9 @@ static void
 app_pause(void *data)
 {
 	/* Take necessary actions when application becomes invisible. */
+	if (alarmStateActive == true) {
+		launchUIapp();
+	}
 }
 
 static void
@@ -111,6 +126,9 @@ static void
 app_terminate(void *data)
 {
 	/* Release all resources. */
+	if (alarmStateActive == true) {
+			launchUIapp();
+	}
 }
 
 static void
@@ -149,7 +167,8 @@ ui_app_low_memory(app_event_info_h event_info, void *user_data)
 	/*APP_EVENT_LOW_MEMORY*/
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 	appdata_s ad = {0,};
 	int ret = 0;
