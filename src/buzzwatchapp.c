@@ -1,5 +1,6 @@
 #include "buzzwatchapp.h"
 #include <stdbool.h>
+// test comment
 
 typedef struct appdata {
 	Evas_Object *win;
