@@ -2,6 +2,7 @@
 #include <device/haptic.h>
 
 // adding a comment
+// hello
 
 typedef struct appdata {
 	Evas_Object *win;
