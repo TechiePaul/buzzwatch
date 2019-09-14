@@ -1,5 +1,5 @@
 #include "buzzwatchapp.h"
-
+// test comment
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
