@@ -69,11 +69,12 @@ create_base_gui(appdata_s *ad)
 
 static void launchUIapp()
 {
-    app_control_h app_control = NULL;
+    app_control_h app_control = NULL; //app_control handle
 	app_control_create(&app_control);
-	app_control_set_operation(app_control, APP_CONTROL_OPERATION_DEFAULT);
-	app_control_set_app_id(app_control, "org.example.buzzwatchapp");
+	app_control_set_operation(app_control, APP_CONTROL_OPERATION_DEFAULT); //sets the app operation (default is launch)
+	app_control_set_app_id(app_control, "org.example.buzzwatchapp"); //sets the app ID to launch
 
+	// Requests a launch of the application, Logs if the application launched correctly or not
 	if(app_control_send_launch_request(app_control, NULL, NULL) == APP_CONTROL_ERROR_NONE)
 	{
 	    dlog_print(DLOG_INFO, "LAUNCH TEST", "Succeeded to launch Buzz Watch app UI.");
@@ -85,7 +86,7 @@ static void launchUIapp()
 	    // app launched unsuccessfully
 	}
 
-	app_control_destroy(app_control);
+	app_control_destroy(app_control); // Releases resources back to the OS
 }
 
 static bool
