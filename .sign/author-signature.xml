@@ -4,7 +4,7 @@
 <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></SignatureMethod>
 <Reference URI="bin%2Fbuzzwatchapp">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod>
-<DigestValue>MUP+xYcT1XtmknOMO/jPcaexlI3+WhFV0J3OtDLNODw=</DigestValue>
+<DigestValue>48JWeZtW1IAPZlAEzeLhCe9niIYAQ+Qn9I69R03pK50=</DigestValue>
 </Reference>
 <Reference URI="shared%2Fres%2Fbuzzwatchapp.png">
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod>
@@ -23,9 +23,9 @@
 </Reference>
 </SignedInfo>
 <SignatureValue>
-fnwBc/O5l/p0eXn5qEz1itaAMtVpGJPdEq9gCY0on/3wc7Bttvc8rBySxI72Y/+feVxJTZBdEx6G
-MErhhV1VmoETYCt4F1S+Js5TT8jkG1vCeys8QPLnPAQcVIOICSgMJT7kPmTlWY3EVpKa7SoEmoIw
-Gjw6PU6hB2Crj/rC6Eg=
+HfO3RRukeKFIt9l/4PrtC7ksuU8ctb9hguXgamgCJNkOrOZKIEyHlw5DCP0eLyZY02bvAuR09r8H
+Whp0Aja/QFbOecWAiPycXa7A8c04wjlJdPfTqEru6H9r2IbnIITYq5U1yzCZ9zkxTIhOohqwmKcI
+laKkhAVBpwsKgwTCTtY=
 </SignatureValue>
 <KeyInfo>
 <X509Data>

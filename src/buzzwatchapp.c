@@ -1,6 +1,6 @@
 #include "buzzwatchapp.h"
+#include "relaunch.h"
 #include <stdbool.h>
-// test comment
 
 typedef struct appdata {
 	Evas_Object *win;
@@ -8,7 +8,9 @@ typedef struct appdata {
 	Evas_Object *label;
 } appdata_s;
 
-static bool alarmStateActive = true;
+static bool alarmStateActive = true; // Alarm On/Off state
+const char *AppID = "org.example.buzzwatchapp"; // Pointer to Application ID
+
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -67,28 +69,6 @@ create_base_gui(appdata_s *ad)
 	evas_object_show(ad->win);
 }
 
-static void launchUIapp()
-{
-    app_control_h app_control = NULL; //app_control handle
-	app_control_create(&app_control);
-	app_control_set_operation(app_control, APP_CONTROL_OPERATION_DEFAULT); //sets the app operation (default is launch)
-	app_control_set_app_id(app_control, "org.example.buzzwatchapp"); //sets the app ID to launch
-
-	// Requests a launch of the application, Logs if the application launched correctly or not
-	if(app_control_send_launch_request(app_control, NULL, NULL) == APP_CONTROL_ERROR_NONE)
-	{
-	    dlog_print(DLOG_INFO, "LAUNCH TEST", "Succeeded to launch Buzz Watch app UI.");
-		// app launched successfully
-	}
-	else
-	{
-	    dlog_print(DLOG_ERROR, "LAUNCH TEST", "Failed to launch Buzz Watch app UI.");
-	    // app launched unsuccessfully
-	}
-
-	app_control_destroy(app_control); // Releases resources back to the OS
-}
-
 static bool
 app_create(void *data)
 {
@@ -114,8 +94,9 @@ app_pause(void *data)
 {
 	/* Take necessary actions when application becomes invisible. */
 	if (alarmStateActive == true) {
-		launchUIapp();
+		launchUIapp(AppID);
 	}
+	dlog_print(DLOG_INFO, "TEST LAUNCH", "Buzz Watch app UI paused.");
 }
 
 static void
@@ -129,8 +110,9 @@ app_terminate(void *data)
 {
 	/* Release all resources. */
 	if (alarmStateActive == true) {
-			launchUIapp();
+		launchUIapp(AppID);
 	}
+	dlog_print(DLOG_INFO, "TEST LAUNCH", "Buzz Watch app UI terminated.");
 }
 
 static void
