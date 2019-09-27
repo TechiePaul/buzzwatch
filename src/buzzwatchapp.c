@@ -1,4 +1,6 @@
-//Charlie was here.
+/*
+ Charlie was here.
+*/
 
 #include "buzzwatchapp.h"
 // test comment
