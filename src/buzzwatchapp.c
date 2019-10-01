@@ -20,6 +20,19 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 	elm_win_lower(ad->win);
 }
 
+Eina_Bool rotaryHandlerCallback(void *data, Eext_Rotary_Event_Info *ev)
+{
+    if (ev->direction == EEXT_ROTARY_DIRECTION_CLOCKWISE) {
+        dlog_print(DLOG_DEBUG, LOG_TAG,
+                   "Rotary device rotated in clockwise direction");
+    } else {
+        dlog_print(DLOG_DEBUG, LOG_TAG,
+                   "Rotary device rotated in counter-clockwise direction");
+    }
+
+    return EINA_FALSE;
+}
+
 static void
 create_base_gui(appdata_s *ad)
 {
@@ -37,6 +50,9 @@ create_base_gui(appdata_s *ad)
 	evas_object_smart_callback_add(ad->win, "delete,request", win_delete_request_cb, NULL);
 	eext_object_event_callback_add(ad->win, EEXT_CALLBACK_BACK, win_back_cb, ad);
 
+	/* Register the handler */
+	    eext_rotary_event_handler_add(rotaryHandlerCallback, NULL);
+
 	/* Conformant */
 	/* Create and initialize elm_conformant.
 	   elm_conformant is mandatory for base gui to have proper size
@@ -48,6 +64,7 @@ create_base_gui(appdata_s *ad)
 	elm_win_resize_object_add(ad->win, ad->conform);
 	evas_object_show(ad->conform);
 
+
 	/* Label */
 	/* Create an actual view of the base gui.
 	   Modify this part to change the view. */
@@ -55,6 +72,7 @@ create_base_gui(appdata_s *ad)
 	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
 	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	elm_object_content_set(ad->conform, ad->label);
+
 
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
@@ -96,6 +114,9 @@ static void
 app_terminate(void *data)
 {
 	/* Release all resources. */
+
+	/* Remove the handler */
+	eext_rotary_event_handler_del(rotaryHandlerCallback);
 }
 
 static void
