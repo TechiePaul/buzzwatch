@@ -1,5 +1,6 @@
 #include "buzzwatchapp.h"
-// test comment
+// hardware event branch
+
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
@@ -18,6 +19,25 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 	appdata_s *ad = data;
 	/* Let window go to hide state. */
 	elm_win_lower(ad->win);
+}
+
+Eina_Bool ctrl_pressed = EINA_FALSE;
+
+/* Define the callback */
+static Eina_Bool
+_key_down_cb(void *data __UNUSED__, int type __UNUSED__, void *ev)
+{
+    /* Access the fields of the event key type ("*ev") */
+    Ecore_Event_Key *event = ev;
+
+    /* Test whether the pressed key is Ctrl */
+    if (!strcmp("Control_L", event->key)) {
+        /* If it is, store that information */
+        ctrl_pressed = EINA_TRUE;
+    }
+
+    /* Let the event continue to other callbacks */
+    return ECORE_CALLBACK_PASS_ON;
 }
 
 static void
@@ -55,6 +75,13 @@ create_base_gui(appdata_s *ad)
 	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
 	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	elm_object_content_set(ad->conform, ad->label);
+
+	/* Register the callback */
+	ecore_event_handler_add(ECORE_EVENT_KEY_DOWN, _key_down_cb, NULL);
+
+	eext_win_keygrab_set(ad->win, "XF86Back");
+	eext_win_keygrab_set(ad->win, "XF86Menu");
+
 
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
@@ -96,6 +123,10 @@ static void
 app_terminate(void *data)
 {
 	/* Release all resources. */
+
+	//eext_win_keygrab_unset(ad->win, "XF86Back");
+	//eext_win_keygrab_unset(ad->win, "XF86Menu");
+
 }
 
 static void
