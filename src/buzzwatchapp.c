@@ -21,19 +21,21 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 	elm_win_lower(ad->win);
 }
 
-Eina_Bool ctrl_pressed = EINA_FALSE;
-
 /* Define the callback */
-static Eina_Bool
-_key_down_cb(void *data __UNUSED__, int type __UNUSED__, void *ev)
+static Eina_Bool keyPressCallback(void *data __UNUSED__, int type __UNUSED__, void *ev)
 {
     /* Access the fields of the event key type ("*ev") */
     Ecore_Event_Key *event = ev;
 
-    /* Test whether the pressed key is Ctrl */
-    if (!strcmp("Control_L", event->key)) {
-        /* If it is, store that information */
-        ctrl_pressed = EINA_TRUE;
+    /* Test whether the pressed key is Back */
+    if (!strcmp("XF86Back", event->key))
+    {
+		dlog_print(DLOG_INFO, LOG_TAG, "Back Button Pressed", ret);
+    }
+    /* Test whether the pressed key is Menu */
+    else if (!strcmp("XF86Menu", event->key))
+    {
+    	dlog_print(DLOG_INFO, LOG_TAG, "Menu Button Pressed", ret);
     }
 
     /* Let the event continue to other callbacks */
@@ -79,6 +81,7 @@ create_base_gui(appdata_s *ad)
 	/* Register the callback */
 	ecore_event_handler_add(ECORE_EVENT_KEY_DOWN, _key_down_cb, NULL);
 
+	/* Grab key events */
 	eext_win_keygrab_set(ad->win, "XF86Back");
 	eext_win_keygrab_set(ad->win, "XF86Menu");
 
