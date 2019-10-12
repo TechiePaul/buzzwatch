@@ -22,20 +22,23 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 /* Define the callback */
-static Eina_Bool keyPressCallback(void *data __UNUSED__, int type __UNUSED__, void *ev)
+static Eina_Bool keyPressCallback(void *data, int type, void *ev)
 {
-    /* Access the fields of the event key type ("*ev") */
+
+	// The callback is used with the ECORE_EVENT_KEY_DOWN signal: the
+	// parameter "void *ev" is therefore of the actual type Ecore_Event_Key
+	// The following renders its fields accessible
     Ecore_Event_Key *event = ev;
 
     /* Test whether the pressed key is Back */
     if (!strcmp("XF86Back", event->key))
     {
-		dlog_print(DLOG_INFO, LOG_TAG, "Back Button Pressed", ret);
+		dlog_print(DLOG_INFO, LOG_TAG, "Back Button Pressed");
     }
     /* Test whether the pressed key is Menu */
-    else if (!strcmp("XF86Menu", event->key))
+    else if (!strcmp("XF86PowerOff", event->key))
     {
-    	dlog_print(DLOG_INFO, LOG_TAG, "Menu Button Pressed", ret);
+    	dlog_print(DLOG_INFO, LOG_TAG, "Power Button Pressed");
     }
 
     /* Let the event continue to other callbacks */
@@ -79,7 +82,7 @@ create_base_gui(appdata_s *ad)
 	elm_object_content_set(ad->conform, ad->label);
 
 	/* Register the callback */
-	ecore_event_handler_add(ECORE_EVENT_KEY_DOWN, _key_down_cb, NULL);
+	ecore_event_handler_add(ECORE_EVENT_KEY_DOWN, keyPressCallback, NULL);
 
 	/* Grab key events */
 	eext_win_keygrab_set(ad->win, "XF86Back");
