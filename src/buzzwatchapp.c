@@ -1,9 +1,10 @@
 #include "buzzwatchapp.h"
-// test comment
+// Parent Alarm Stop
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *label;
+	Evas_Object *box;
 } appdata_s;
 
 static void
@@ -20,10 +21,16 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info)
 	elm_win_lower(ad->win);
 }
 
+static void buttonClickCallback(void *data, Evas_Object *button, void *ev)
+{
+   elm_object_text_set(button, "Clicked!");
+}
+
 static void
 create_base_gui(appdata_s *ad)
 {
 	/* Window */
+
 	/* Create and initialize elm_win.
 	   elm_win is mandatory to manipulate window. */
 	ad->win = elm_win_util_standard_add(PACKAGE, PACKAGE);
@@ -37,24 +44,23 @@ create_base_gui(appdata_s *ad)
 	evas_object_smart_callback_add(ad->win, "delete,request", win_delete_request_cb, NULL);
 	eext_object_event_callback_add(ad->win, EEXT_CALLBACK_BACK, win_back_cb, ad);
 
-	/* Conformant */
-	/* Create and initialize elm_conformant.
-	   elm_conformant is mandatory for base gui to have proper size
-	   when indicator or virtual keypad is visible. */
-	ad->conform = elm_conformant_add(ad->win);
-	elm_win_indicator_mode_set(ad->win, ELM_WIN_INDICATOR_SHOW);
-	elm_win_indicator_opacity_set(ad->win, ELM_WIN_INDICATOR_OPAQUE);
-	evas_object_size_hint_weight_set(ad->conform, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	elm_win_resize_object_add(ad->win, ad->conform);
-	evas_object_show(ad->conform);
+	ad->box = elm_box_add(ad->win);
+	evas_object_size_hint_weight_set(ad->box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_show(ad->box);
+	elm_win_resize_object_add(ad->win, ad->box);
 
-	/* Label */
-	/* Create an actual view of the base gui.
-	   Modify this part to change the view. */
-	ad->label = elm_label_add(ad->conform);
-	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
-	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	elm_object_content_set(ad->conform, ad->label);
+	//create_button(ad->box);
+
+	Evas_Object* button;
+
+	button = elm_button_add(ad->box);
+	elm_object_text_set(button, "Test");
+	evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_size_hint_align_set(button, EVAS_HINT_FILL, 0.5);
+	elm_box_pack_end(ad->box, button);
+	evas_object_show(button);
+
+	evas_object_smart_callback_add(button, "clicked", buttonClickCallback, NULL);
 
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
