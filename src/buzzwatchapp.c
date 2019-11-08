@@ -1,14 +1,186 @@
-/*
- Charlie was here.
-*/
-
 #include "buzzwatchapp.h"
-// test comment
+#include "device/haptic.h"
+#include <unistd.h>
+#include <time.h>
+#include <stdio.h>
+
 typedef struct appdata {
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *label;
+    Evas_Object *box;
+    Evas_Object *list;
 } appdata_s;
+typedef struct appdata appdata_s;
+
+bool vibEnabled = true;
+
+haptic_device_h myVibratingThing;
+
+void vibrate();
+void vibrate(vibPattern){
+
+	/*
+	 * The delays are measured microseconds, not milliseconds.
+	 *
+	 * This is because sleep() takes an integer, not a float/double.
+	 * To compensate for this, I use usleep().
+	 * To use this, put the time in milliseconds + 3 zeros.
+	 * E.g. usleep(1000000) - One second.
+	 */
+
+	int usleep(useconds_t useconds);
+
+ 	int returnedVal;
+
+	haptic_effect_h effect_handle;
+	returnedVal = device_haptic_open(0, &myVibratingThing);
+
+	switch(vibPattern)
+	{
+	case 0:
+		vibEnabled = false;
+		usleep(200000);
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		break;
+
+	case 1:
+
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		usleep(500000);
+		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
+		usleep(500000);
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		usleep(800000);
+		break;
+
+	case 2:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 1000, 100, &effect_handle);
+		usleep(1000000);
+		device_haptic_vibrate(myVibratingThing, 1000, 50, &effect_handle);
+		usleep(1000000);
+		device_haptic_vibrate(myVibratingThing, 1000, 20, &effect_handle);
+		usleep(1000000);
+		break;
+
+	case 3:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 1000, 100, &effect_handle);
+		usleep(1300000);
+		device_haptic_vibrate(myVibratingThing, 1000, 50, &effect_handle);
+		usleep(1300000);
+		device_haptic_vibrate(myVibratingThing, 1000, 20, &effect_handle);
+		usleep(1300000);
+		break;
+
+	case 4:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(320000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		break;
+
+	case 5:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 20, &effect_handle);
+		usleep(430000);
+		device_haptic_vibrate(myVibratingThing, 400, 20, &effect_handle);
+		usleep(430000);
+		break;
+
+	case 6:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 1800, 100, &effect_handle);
+		usleep(2100000);
+		device_haptic_vibrate(myVibratingThing, 1800, 50, &effect_handle);
+		usleep(2100000);
+		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
+		usleep(110000);
+		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
+		usleep(110000);
+		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
+		usleep(2100000);
+		break;
+
+	case 7:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(165000);
+		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
+		usleep(165000);
+		break;
+
+	case 8:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
+		usleep(120000);
+		break;
+
+	case 9:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(180000);
+		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
+		usleep(700000);
+		break;
+
+	case 10:
+		vibEnabled = true;
+		device_haptic_vibrate(myVibratingThing, 500, 100, &effect_handle);
+		usleep(650000);
+		device_haptic_vibrate(myVibratingThing, 500, 50, &effect_handle);
+		usleep(650000);
+		device_haptic_vibrate(myVibratingThing, 500, 75, &effect_handle);
+		usleep(900000);
+		break;
+
+	default:
+		dlog_print(DLOG_WARN, "vibrate() error", "Error in function vibrate(). Pattern is not valid. (1 to 10, 0 to cancel).");
+		break;
+	}
+
+}
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -16,64 +188,18 @@ win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
 	ui_app_exit();
 }
 
-static void
-win_back_cb(void *data, Evas_Object *obj, void *event_info)
-{
-	appdata_s *ad = data;
-	/* Let window go to hide state. */
-	elm_win_lower(ad->win);
-}
-
-static void
-create_base_gui(appdata_s *ad)
-{
-	/* Window */
-	/* Create and initialize elm_win.
-	   elm_win is mandatory to manipulate window. */
-	ad->win = elm_win_util_standard_add(PACKAGE, PACKAGE);
-	elm_win_autodel_set(ad->win, EINA_TRUE);
-
-	if (elm_win_wm_rotation_supported_get(ad->win)) {
-		int rots[4] = { 0, 90, 180, 270 };
-		elm_win_wm_rotation_available_rotations_set(ad->win, (const int *)(&rots), 4);
-	}
-
-	evas_object_smart_callback_add(ad->win, "delete,request", win_delete_request_cb, NULL);
-	eext_object_event_callback_add(ad->win, EEXT_CALLBACK_BACK, win_back_cb, ad);
-
-	/* Conformant */
-	/* Create and initialize elm_conformant.
-	   elm_conformant is mandatory for base gui to have proper size
-	   when indicator or virtual keypad is visible. */
-	ad->conform = elm_conformant_add(ad->win);
-	elm_win_indicator_mode_set(ad->win, ELM_WIN_INDICATOR_SHOW);
-	elm_win_indicator_opacity_set(ad->win, ELM_WIN_INDICATOR_OPAQUE);
-	evas_object_size_hint_weight_set(ad->conform, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	elm_win_resize_object_add(ad->win, ad->conform);
-	evas_object_show(ad->conform);
-
-	/* Label */
-	/* Create an actual view of the base gui.
-	   Modify this part to change the view. */
-	ad->label = elm_label_add(ad->conform);
-	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
-	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	elm_object_content_set(ad->conform, ad->label);
-
-	/* Show window after base gui is set up */
-	evas_object_show(ad->win);
-}
-
 static bool
 app_create(void *data)
 {
-	/* Hook to take necessary actions before main event loop starts
-		Initialize UI resources and application's data
-		If this function returns true, the main loop of application starts
-		If this function returns false, the application is terminated */
-	appdata_s *ad = data;
-
-	create_base_gui(ad);
+	device_haptic_close(myVibratingThing);
+	while(true)
+	{
+		int random_number;
+		srand((unsigned)time(NULL));
+		random_number = rand() % 10;
+		random_number++;
+		vibrate(random_number);
+	}
 
 	return true;
 }
@@ -99,6 +225,7 @@ app_resume(void *data)
 static void
 app_terminate(void *data)
 {
+	device_haptic_close(myVibratingThing);
 	/* Release all resources. */
 }
 
