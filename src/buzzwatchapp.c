@@ -1,8 +1,22 @@
 #include "buzzwatchapp.h"
 #include "device/haptic.h"
+#include "vibHandler.h"
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
+#include <app_alarm.h>
+
+int alarm_id = 0;
+app_control_h app_controller;
+
+/*
+	int random_number;
+	srand((unsigned)time(NULL));
+	random_number = rand() % 10;
+	random_number++;
+
+    For Charlie.
+*/
 
 typedef struct appdata {
 	Evas_Object *win;
@@ -13,193 +27,27 @@ typedef struct appdata {
 } appdata_s;
 typedef struct appdata appdata_s;
 
-bool vibEnabled = true;
-
-haptic_device_h myVibratingThing;
-
-void vibrate();
-void vibrate(vibPattern){
-
-	/*
-	 * The delays are measured microseconds, not milliseconds.
-	 *
-	 * This is because sleep() takes an integer, not a float/double.
-	 * To compensate for this, I use usleep().
-	 * To use this, put the time in milliseconds + 3 zeros.
-	 * E.g. usleep(1000000) - One second.
-	 */
-
-	int usleep(useconds_t useconds);
-
- 	int returnedVal;
-
-	haptic_effect_h effect_handle;
-	returnedVal = device_haptic_open(0, &myVibratingThing);
-
-	switch(vibPattern)
-	{
-	case 0:
-		vibEnabled = false;
-		usleep(200000);
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		break;
-
-	case 1:
-
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		usleep(500000);
-		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
-		usleep(500000);
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		usleep(800000);
-		break;
-
-	case 2:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 1000, 100, &effect_handle);
-		usleep(1000000);
-		device_haptic_vibrate(myVibratingThing, 1000, 50, &effect_handle);
-		usleep(1000000);
-		device_haptic_vibrate(myVibratingThing, 1000, 20, &effect_handle);
-		usleep(1000000);
-		break;
-
-	case 3:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 1000, 100, &effect_handle);
-		usleep(1300000);
-		device_haptic_vibrate(myVibratingThing, 1000, 50, &effect_handle);
-		usleep(1300000);
-		device_haptic_vibrate(myVibratingThing, 1000, 20, &effect_handle);
-		usleep(1300000);
-		break;
-
-	case 4:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(320000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		break;
-
-	case 5:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 100, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 50, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 20, &effect_handle);
-		usleep(430000);
-		device_haptic_vibrate(myVibratingThing, 400, 20, &effect_handle);
-		usleep(430000);
-		break;
-
-	case 6:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 1800, 100, &effect_handle);
-		usleep(2100000);
-		device_haptic_vibrate(myVibratingThing, 1800, 50, &effect_handle);
-		usleep(2100000);
-		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
-		usleep(110000);
-		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
-		usleep(110000);
-		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
-		usleep(2100000);
-		break;
-
-	case 7:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(165000);
-		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
-		usleep(165000);
-		break;
-
-	case 8:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 100, 100, &effect_handle);
-		usleep(120000);
-		break;
-
-	case 9:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 20, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 50, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(180000);
-		device_haptic_vibrate(myVibratingThing, 150, 100, &effect_handle);
-		usleep(700000);
-		break;
-
-	case 10:
-		vibEnabled = true;
-		device_haptic_vibrate(myVibratingThing, 500, 100, &effect_handle);
-		usleep(650000);
-		device_haptic_vibrate(myVibratingThing, 500, 50, &effect_handle);
-		usleep(650000);
-		device_haptic_vibrate(myVibratingThing, 500, 75, &effect_handle);
-		usleep(900000);
-		break;
-
-	default:
-		dlog_print(DLOG_WARN, "vibrate() error", "Error in function vibrate(). Pattern is not valid. (1 to 10, 0 to cancel).");
-		break;
-	}
-
-}
-
-static void
-win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
-{
-	ui_app_exit();
+//Returns the delay in seconds that it randomly generated from min_delay to max_delay.
+int timeDelay(int min_delay, int max_delay){
+	srand((unsigned)time(NULL));
+	int delay_in_mins = rand() % (max_delay + 1 - min_delay);
+	int delay_in_seconds = delay_in_mins * 60;
+	delay_in_seconds = delay_in_seconds + (min_delay * 60);
+	return(delay_in_seconds);
 }
 
 static bool
 app_create(void *data)
 {
-	device_haptic_close(myVibratingThing);
-	while(true)
-	{
-		int random_number;
-		srand((unsigned)time(NULL));
-		random_number = rand() % 10;
-		random_number++;
-		vibrate(random_number);
-	}
+	app_control_create(&app_controller);
+	app_control_set_operation(app_controller, APP_CONTROL_OPERATION_DEFAULT); //Sets the application operation (default is launch).
+	app_control_set_app_id(app_controller, PACKAGE); //Sets the application ID to launch.
+
+	//int error_handler = alarm_schedule_once_after_delay(app_controller, 10, &alarm_id);
+
+	//alarm_schedule_once_after_delay(app_controller, 10, &alarm_id);
+
+	VH_vibrate(3);
 
 	return true;
 }
@@ -207,7 +55,16 @@ app_create(void *data)
 static void
 app_control(app_control_h app_control, void *data)
 {
-	/* Handle the launch request. */
+	int delay_one = timeDelay(1, 2);
+	int error_handler_two = alarm_schedule_once_after_delay(app_controller, delay_one, &alarm_id);
+
+	//dlog_print(DLOG_DEBUG, LOG_TAG, "app_resume  - delay: %d", delay_one);
+
+	int random_number;
+	srand((unsigned)time(NULL));
+	random_number = rand() % 10;
+	random_number++;
+	VH_vibrate(random_number);
 }
 
 static void
@@ -219,13 +76,23 @@ app_pause(void *data)
 static void
 app_resume(void *data)
 {
-	/* Take necessary actions when application becomes visible. */
+	int delay_two = timeDelay(1, 2);
+	int error_handler_three = alarm_schedule_once_after_delay(app_controller, delay_two, &alarm_id);
+
+	//dlog_print(DLOG_DEBUG, LOG_TAG, "app_resume  - delay: %d", delay_two);
+
+	int random_number;
+	srand((unsigned)time(NULL));
+	random_number = rand() % 10;
+	random_number++;
+	VH_vibrate(random_number);
+	return;
 }
 
 static void
 app_terminate(void *data)
 {
-	device_haptic_close(myVibratingThing);
+	VH_kill();
 	/* Release all resources. */
 }
 
