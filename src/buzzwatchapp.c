@@ -34,6 +34,7 @@
 #include "buzzwatchapp.h"
 #include "device/haptic.h"
 #include "vibHandler.h"
+#include "BT_BaseTypes.h"
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
@@ -94,22 +95,22 @@ static void win_back_cb(void *data, Evas_Object *obj, void *event_info)
  * @param MinDelay (tINT32): this is the minimum delay in minutes
  * @param MaxDelay (tINT32): this is the maximum delay in minutes
  */
-tINT32 timeDelay(tINT32 MinDelay, tINT32 MaxDelay)
+tINT32 timeDelay(tINT32 iMinDelay, tINT32 iMaxDelay)
 {
 	// set the seed for the random number generator to the current time... this makes it more
 	// random.
 	srand((unsigned)time(NULL));
 
 	// create a random number in minutes in the range MinDelay to MaxDelay
-    tINT32 DelayInMins = rand() % (MaxDelay + 1 - MinDelay);
+    tINT32 iDelayInMins = rand() % (iMaxDelay + 1 - iMinDelay);
 
     // convert to seconds
-	tINT32 DelayInSecs = delay_in_mins * 60;
+	tINT32 iDelayInSecs = iDelayInMins * 60;
 
 	// offset by MinDelay minutes
-	DelayInSecs = DelayInSecs + (MinDelay * 60);
+	iDelayInSecs = iDelayInSecs + (iMinDelay * 60);
 
-	return(DelayInSecs);
+	return(iDelayInSecs);
 }
 
 /**
@@ -212,11 +213,9 @@ static void app_control(app_control_h app_control, void *data)
 	int iDelayOne = timeDelay(1, 3);
 
 	// retrigger itself after the random delay
-    alarm_schedule_once_after_delay(tsBWA_AppController, iDelayOne, &BWA_AlarmId);
+    alarm_schedule_once_after_delay(tsBWA_AppController, iDelayOne, &iBWA_AlarmId);
 
 	tsBWA_AppData *ad = data;
-
-	dlog_print(DLOG_ERROR, "setting_delay", "app_control  - delay: %d", delay_one);
 
 	// generate a random number between 0 and 10
 	int random_number;
