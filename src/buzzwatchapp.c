@@ -1,39 +1,163 @@
+/***********************************************************************************
+ *  @file buzzwatchapp.c
+ ***********************************************************************************
+ *  ╦ ╦╔═╗╔╦╗  ┌─┐┌─┐┌┬┐┌─┐  ┌─┐┬  ┬ ┬┌┐
+ *  ║║║╠═╣║║║  │  │ │ ││├┤   │  │  │ │├┴┐
+ *  ╚╩╝╩ ╩╩ ╩  └─┘└─┘─┴┘└─┘  └─┘┴─┘└─┘└─┘
+ ***********************************************************************************
+ *  Copyright (c) 2020 WAM code club
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ ***********************************************************************************
+ * This code is invoked by Tizen when controlling the buzzwatch app.
+ * Buzzwatch can be used by those who need reminding to perform rehab
+ * exercises that are necessary to aid the recovery from a number of conditions
+ * including strokes, broken bones etc.
+ ***********************************************************************************/
+
 #include "buzzwatchapp.h"
-// test comment
-typedef struct appdata {
+#include "device/haptic.h"
+#include "vibHandler.h"
+#include <unistd.h>
+#include <time.h>
+#include <stdio.h>
+#include <app_alarm.h>
+
+/**
+ * This is an OS handle to an alarm object, the app uses a regular alarm to trigger the app
+ */
+tINT32 iBWA_AlarmId = 0;
+
+/**
+ * This is an OS handle to an app controller, this app control function is invoked following app
+ * startup and following the alarm defined by BWA_AlarmId
+ */
+app_control_h tsBWA_AppController;
+
+
+/**
+ * This boolean is used to indicate if the app should be vibrating the watch or not.
+ */
+bool bBWA_Vibrate = TRUE;
+
+/**
+ * This is a structure used to hold the data for the app, the OS holds on to this data
+ * between OS invocations of the app.
+ */
+typedef struct tsBWA_AppData
+{
 	Evas_Object *win;
 	Evas_Object *conform;
 	Evas_Object *label;
-} appdata_s;
+    Evas_Object *box;
+    Evas_Object *list;
+} tsBWA_AppData;
 
-static void
-win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
+/**
+ * Called from the task manager when there is a request to kill the app
+ */
+static void win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
 {
+	// TODO: needs to kill all the resources including alarms and control objects.
 	ui_app_exit();
 }
 
-static void
-win_back_cb(void *data, Evas_Object *obj, void *event_info)
+/**
+ * Some kind of callback for setting the background properties
+ */
+static void win_back_cb(void *data, Evas_Object *obj, void *event_info)
 {
-	appdata_s *ad = data;
+	tsBWA_AppData *ad = data;
 	/* Let window go to hide state. */
 	elm_win_lower(ad->win);
 }
 
-static void
-create_base_gui(appdata_s *ad)
+/**
+ * This function returns a random delay in seconds between min_delay minutes and max_delay minutes
+ * @return the number of seconds to delay
+ * @param MinDelay (tINT32): this is the minimum delay in minutes
+ * @param MaxDelay (tINT32): this is the maximum delay in minutes
+ */
+tINT32 timeDelay(tINT32 MinDelay, tINT32 MaxDelay)
 {
-	/* Window */
-	/* Create and initialize elm_win.
-	   elm_win is mandatory to manipulate window. */
+	// set the seed for the random number generator to the current time... this makes it more
+	// random.
+	srand((unsigned)time(NULL));
+
+	// create a random number in minutes in the range MinDelay to MaxDelay
+    tINT32 DelayInMins = rand() % (MaxDelay + 1 - MinDelay);
+
+    // convert to seconds
+	tINT32 DelayInSecs = delay_in_mins * 60;
+
+	// offset by MinDelay minutes
+	DelayInSecs = DelayInSecs + (MinDelay * 60);
+
+	return(DelayInSecs);
+}
+
+/**
+ * This function is called when the user clicks the button displayed at the center of the app.
+ */
+static void buttonClickCallback(void *data, Evas_Object *button, void *ev)
+{
+   // if the button has been clicked to deactive then
+   if (bBWA_Vibrate == TRUE)
+   {
+	   // toggle the message on the screen.
+	   elm_object_text_set(button, "Click to activate");
+	   // toggle the boolean.
+	   bBWA_Vibrate = FALSE;
+   }
+   else
+   {
+	   // toggle the message on the screen.
+	   elm_object_text_set(button, "Click to deactivate");
+	   // toggle the boolean.
+	   bBWA_Vibrate = TRUE;
+   }
+}
+
+/**
+ * Called when the app starts up. Creates the control app callback, the alarm, sets the
+ * alarm time and puts the activate/deactivate button on the screen.
+ * @param data (void*) this is a pointer to the application specific data maintained by the OS.
+ */
+static bool app_create(void *data)
+{
+	tsBWA_AppData *ad = data;
+	Evas_Object* button;
+
+	// create the control app callback
+	app_control_create(&tsBWA_AppController);
+	app_control_set_operation(tsBWA_AppController, APP_CONTROL_OPERATION_DEFAULT); //Sets the application operation (default is launch).
+	app_control_set_app_id(tsBWA_AppController, PACKAGE); //Sets the application ID to launch.
+
+	dlog_print(DLOG_ERROR, "setting_delay", "app_create");
+
+    // create a window.
 	ad->win = elm_win_util_standard_add(PACKAGE, PACKAGE);
 	elm_win_autodel_set(ad->win, EINA_TRUE);
-
 	if (elm_win_wm_rotation_supported_get(ad->win)) {
 		int rots[4] = { 0, 90, 180, 270 };
 		elm_win_wm_rotation_available_rotations_set(ad->win, (const int *)(&rots), 4);
 	}
-
 	evas_object_smart_callback_add(ad->win, "delete,request", win_delete_request_cb, NULL);
 	eext_object_event_callback_add(ad->win, EEXT_CALLBACK_BACK, win_back_cb, ad);
 
@@ -52,54 +176,85 @@ create_base_gui(appdata_s *ad)
 	/* Create an actual view of the base gui.
 	   Modify this part to change the view. */
 	ad->label = elm_label_add(ad->conform);
-	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
+
 	evas_object_size_hint_weight_set(ad->label, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	elm_object_content_set(ad->conform, ad->label);
 
+	ad->box = elm_box_add(ad->win);
+	evas_object_size_hint_weight_set(ad->box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_show(ad->box);
+	elm_win_resize_object_add(ad->win, ad->box);
+
+	// create the button, the alarm is on by default, therefore the initial message is
+	// "Click to deactivate"
+	button = elm_button_add(ad->box);
+	elm_object_text_set(button, "Click to deactivate");
+	evas_object_size_hint_weight_set(button, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	evas_object_size_hint_align_set(button, EVAS_HINT_FILL, 0.5);
+	elm_box_pack_end(ad->box, button);
+	evas_object_show(button);
+
+	// assign the callback function when the button is clicked.
+	evas_object_smart_callback_add(button, "clicked", buttonClickCallback, NULL);
+
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
-}
-
-static bool
-app_create(void *data)
-{
-	/* Hook to take necessary actions before main event loop starts
-		Initialize UI resources and application's data
-		If this function returns true, the main loop of application starts
-		If this function returns false, the application is terminated */
-	appdata_s *ad = data;
-
-	create_base_gui(ad);
 
 	return true;
 }
 
-static void
-app_control(app_control_h app_control, void *data)
+// This function is triggered by an alarm after a random delay.
+// It then retriggers itself after a further random delay.
+static void app_control(app_control_h app_control, void *data)
 {
-	/* Handle the launch request. */
+	// get a random delay in seconds.
+	// TODO: currently hardcoded between 1 and 3 minutes.
+	int iDelayOne = timeDelay(1, 3);
+
+	// retrigger itself after the random delay
+    alarm_schedule_once_after_delay(tsBWA_AppController, iDelayOne, &BWA_AlarmId);
+
+	tsBWA_AppData *ad = data;
+
+	dlog_print(DLOG_ERROR, "setting_delay", "app_control  - delay: %d", delay_one);
+
+	// generate a random number between 0 and 10
+	int random_number;
+	srand((unsigned)time(NULL));
+	random_number = rand() % 10;
+	random_number++;
+
+	// only vibrate if the user has enabled vibration.
+	if (bBWA_Vibrate == TRUE)
+	{
+		// vibrate in a random vibration pattern
+		VH_vibrate(random_number);
+	}
+
+    // display the message to the screen
+	// TODO: alter this to the time till next buzz
+	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
+	evas_object_show(ad->win);
 }
 
-static void
-app_pause(void *data)
+static void app_pause(void *data)
 {
 	/* Take necessary actions when application becomes invisible. */
 }
 
-static void
-app_resume(void *data)
+static void app_resume(void *data)
 {
-	/* Take necessary actions when application becomes visible. */
+	return;
 }
 
-static void
-app_terminate(void *data)
+static void app_terminate(void *data)
 {
+	VH_kill();
 	/* Release all resources. */
 }
 
-static void
-ui_app_lang_changed(app_event_info_h event_info, void *user_data)
+
+static void ui_app_lang_changed(app_event_info_h event_info, void *user_data)
 {
 	/*APP_EVENT_LANGUAGE_CHANGED*/
 	char *locale = NULL;
@@ -109,35 +264,33 @@ ui_app_lang_changed(app_event_info_h event_info, void *user_data)
 	return;
 }
 
-static void
-ui_app_orient_changed(app_event_info_h event_info, void *user_data)
+static void ui_app_orient_changed(app_event_info_h event_info, void *user_data)
 {
 	/*APP_EVENT_DEVICE_ORIENTATION_CHANGED*/
 	return;
 }
 
-static void
-ui_app_region_changed(app_event_info_h event_info, void *user_data)
+static void ui_app_region_changed(app_event_info_h event_info, void *user_data)
 {
 	/*APP_EVENT_REGION_FORMAT_CHANGED*/
 }
 
-static void
-ui_app_low_battery(app_event_info_h event_info, void *user_data)
+static void ui_app_low_battery(app_event_info_h event_info, void *user_data)
 {
 	/*APP_EVENT_LOW_BATTERY*/
 }
 
-static void
-ui_app_low_memory(app_event_info_h event_info, void *user_data)
+static void ui_app_low_memory(app_event_info_h event_info, void *user_data)
 {
 	/*APP_EVENT_LOW_MEMORY*/
 }
 
-int
-main(int argc, char *argv[])
+
+// This main function assigns all the callbacks for the application that the OS
+// triggers.
+int main(int argc, char *argv[])
 {
-	appdata_s ad = {0,};
+	tsBWA_AppData ad = {0,};
 	int ret = 0;
 
 	ui_app_lifecycle_callback_s event_callback = {0,};
