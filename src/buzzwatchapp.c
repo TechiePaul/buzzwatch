@@ -51,6 +51,15 @@ tINT32 iBWA_AlarmId = 0;
  */
 app_control_h tsBWA_AppController;
 
+/**
+ * This is the delay to the next buzz.
+ */
+tUINT32 iBWA_DelayInSec;
+
+/**
+ * Counts the seconds between alarms
+ */
+tUINT32 iBWA_SecsBetweenAlarms = 0UL;
 
 /**
  * This boolean is used to indicate if the app should be vibrating the watch or not.
@@ -123,6 +132,7 @@ static void buttonClickCallback(void *data, Evas_Object *button, void *ev)
    {
 	   // toggle the message on the screen.
 	   elm_object_text_set(button, "Click to activate");
+	   alarm_cancel_all();
 	   // toggle the boolean.
 	   bBWA_Vibrate = FALSE;
    }
@@ -132,6 +142,10 @@ static void buttonClickCallback(void *data, Evas_Object *button, void *ev)
 	   elm_object_text_set(button, "Click to deactivate");
 	   // toggle the boolean.
 	   bBWA_Vibrate = TRUE;
+
+	   // restart the timer
+	   iBWA_DelayInSec = timeDelay(1, 3);
+	   iBWA_SecsBetweenAlarms = 0UL;
    }
 }
 
@@ -144,6 +158,9 @@ static bool app_create(void *data)
 {
 	tsBWA_AppData *ad = data;
 	Evas_Object* button;
+
+	// kill any straggling alarms.
+	alarm_cancel_all();
 
 	// create the control app callback
 	app_control_create(&tsBWA_AppController);
@@ -198,6 +215,9 @@ static bool app_create(void *data)
 	// assign the callback function when the button is clicked.
 	evas_object_smart_callback_add(button, "clicked", buttonClickCallback, NULL);
 
+	// get the first delay
+	iBWA_DelayInSec = timeDelay(1, 3);
+
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
 
@@ -210,30 +230,55 @@ static void app_control(app_control_h app_control, void *data)
 {
 	// get a random delay in seconds.
 	// TODO: currently hardcoded between 1 and 3 minutes.
-	int iDelayOne = timeDelay(1, 3);
+	tCHAR sTimeToGo[30];
 
-	// retrigger itself after the random delay
-    alarm_schedule_once_after_delay(tsBWA_AppController, iDelayOne, &iBWA_AlarmId);
+	tUINT32 iCountdownVal;
+	tUINT32 iMinutes;
+	tUINT32 iSeconds;
+
+	// retrigger itself after 1 second
+    alarm_schedule_once_after_delay(tsBWA_AppController, 1, &iBWA_AlarmId);
 
 	tsBWA_AppData *ad = data;
 
 	// generate a random number between 0 and 10
-	int random_number;
+	tINT32 random_number;
 	srand((unsigned)time(NULL));
 	random_number = rand() % 10;
 	random_number++;
 
+	iBWA_SecsBetweenAlarms++;
+
 	// only vibrate if the user has enabled vibration.
 	if (bBWA_Vibrate == TRUE)
 	{
-		// vibrate in a random vibration pattern
-		VH_vibrate(random_number);
+		// IF the alarm is due to expire
+		if (iBWA_SecsBetweenAlarms > iBWA_DelayInSec)
+		{
+			// vibrate in a random vibration pattern
+			VH_vibrate(random_number);
+
+			// display the message to the screen
+			// TODO: alter this to the time till next buzz
+
+
+			// reset counters and generate new random delay
+			iBWA_SecsBetweenAlarms = 0UL;
+			iBWA_DelayInSec = timeDelay(1, 3);
+		}
+
+		// get a countdown in minutes and seconds.
+		iCountdownVal = iBWA_DelayInSec - iBWA_SecsBetweenAlarms;
+		iMinutes = iCountdownVal / 60;
+		iSeconds = iCountdownVal % 60;
+
+
+		sprintf (sTimeToGo, "<align=center>%d:%02d</align>", iMinutes, iSeconds);
+		elm_object_text_set(ad->label, sTimeToGo);
+		evas_object_show(ad->win);
 	}
 
-    // display the message to the screen
-	// TODO: alter this to the time till next buzz
-	elm_object_text_set(ad->label, "<align=center>Hello WAM guys</align>");
-	evas_object_show(ad->win);
+
 }
 
 static void app_pause(void *data)
