@@ -236,9 +236,6 @@ static void app_control(app_control_h app_control, void *data)
 	tUINT32 iMinutes;
 	tUINT32 iSeconds;
 
-	// retrigger itself after 1 second
-    alarm_schedule_once_after_delay(tsBWA_AppController, 1, &iBWA_AlarmId);
-
 	tsBWA_AppData *ad = data;
 
 	// generate a random number between 0 and 10
@@ -258,10 +255,6 @@ static void app_control(app_control_h app_control, void *data)
 			// vibrate in a random vibration pattern
 			VH_vibrate(random_number);
 
-			// display the message to the screen
-			// TODO: alter this to the time till next buzz
-
-
 			// reset counters and generate new random delay
 			iBWA_SecsBetweenAlarms = 0UL;
 			iBWA_DelayInSec = timeDelay(1, 3);
@@ -272,13 +265,14 @@ static void app_control(app_control_h app_control, void *data)
 		iMinutes = iCountdownVal / 60;
 		iSeconds = iCountdownVal % 60;
 
-
+		// display time to next buzz to the screen.
 		sprintf (sTimeToGo, "<align=center>%d:%02d</align>", iMinutes, iSeconds);
 		elm_object_text_set(ad->label, sTimeToGo);
 		evas_object_show(ad->win);
 	}
 
-
+	// retrigger itself after 1 second
+	alarm_schedule_once_after_delay(tsBWA_AppController, 1, &iBWA_AlarmId);
 }
 
 static void app_pause(void *data)
